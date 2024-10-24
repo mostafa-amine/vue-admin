@@ -28,7 +28,7 @@ export const useAuth = defineStore("auth", () => {
 
   async function logout() {
     return window.axios.post("auth/logout").finally(() => {
-      destroyTokenAndRedirectTo("register");
+      destroyTokenAndRedirectTo("login");
     });
   }
 

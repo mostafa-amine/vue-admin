@@ -1,6 +1,7 @@
 import { reactive, ref } from "vue";
 import { defineStore } from "pinia";
 import { useAuth } from "@/stores/auth";
+import { useStorage } from "@vueuse/core";
 
 export const useLogin = defineStore("login", () => {
   const auth = useAuth();
@@ -29,7 +30,9 @@ export const useLogin = defineStore("login", () => {
     return window.axios
       .post("auth/login", form)
       .then((response) => {
-        auth.login(response.data.access_token);
+        const data = response.data;
+        useStorage('profile-image', data.user.image)
+        auth.login(data.access_token);
       })
       .catch((error) => {
         if (error.response.status === 422) {
