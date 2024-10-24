@@ -27,7 +27,7 @@ export const useAuth = defineStore("auth", () => {
   }
 
   async function logout() {
-    return window.axios.post("auth/logout").finally(() => {
+    return window.axios.post("auth/destroy").finally(() => {
       destroyTokenAndRedirectTo("login");
     });
   }
