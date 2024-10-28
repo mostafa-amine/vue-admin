@@ -1,7 +1,6 @@
 import { reactive, ref } from "vue";
 import { defineStore } from "pinia";
 import { useAuth } from "@/stores/auth";
-import { useStorage } from "@vueuse/core";
 
 export const useLogin = defineStore("login", () => {
   const auth = useAuth();
@@ -31,7 +30,6 @@ export const useLogin = defineStore("login", () => {
       .post("auth/login", form)
       .then((response) => {
         const data = response.data;
-        useStorage('profile-image', data.user.image)
         auth.login(data.access_token);
       })
       .catch((error) => {

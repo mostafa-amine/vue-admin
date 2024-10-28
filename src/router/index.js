@@ -1,9 +1,21 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout'
+import { useAuth } from '@/stores/auth';
 
-function auth(to, from, next) {
+async function auth(to, from, next) {
+  const auth = useAuth();
+
   if (!localStorage.getItem("access_token")) {
     return next({ name: "login" });
+  }
+
+  if (to.meta.permission) {
+    if (!auth.permissions) {
+      await auth.getAuthenticatedUser();
+    }
+    if (!auth.can(to.meta.permission)) {
+      return next({ name: "Dashboard" });
+    }
   }
 
   next();
@@ -49,24 +61,28 @@ const routes = [
         path: "/users",
         name: "Users",
         beforeEnter: auth,
+        meta: { permission: "users.view" },
         component: () => import("@/views/Users/IndexView.vue"),
       },
       {
         path: "/users/create",
         name: "users.create",
         beforeEnter: auth,
+        meta: { permission: "users.create" },
         component: () => import("@/views/Users/CreateView.vue"),
       },
       {
         path: "/users/:uuid/edit",
         name: "users.edit",
         beforeEnter: auth,
+        meta: { permission: "users.edit" },
         component: () => import("@/views/Users/EditView.vue"),
       },
       {
         path: "/users/:uuid",
         name: "users.detail",
         beforeEnter: auth,
+        meta: { permission: "users.view" },
         component: () => import("@/views/Users/DetailView.vue"),
       },
     ],

@@ -1,15 +1,22 @@
 <script setup>
-import { onBeforeMount } from 'vue'
+import { onBeforeMount, onMounted } from 'vue'
 import { useColorModes } from '@coreui/vue'
-
 import { useThemeStore } from '@/stores/theme.js'
+import { useAuth } from '@/stores/auth';
+import LinearProgress from './components/LinearProgress.vue';
 
 const { isColorModeSet, setColorMode } = useColorModes(
   'coreui-free-vue-admin-template-theme',
 )
 const currentTheme = useThemeStore()
 
-onBeforeMount(() => {
+const auth = useAuth();
+
+onMounted(async () => {
+  await auth.getAuthenticatedUser();
+});
+
+onBeforeMount(async () => {
   const urlParams = new URLSearchParams(window.location.href.split('?')[1])
   let theme = urlParams.get('theme')
 
@@ -31,7 +38,15 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <router-view />
+  <router-view v-slot="{ Component }">
+    <div v-if="auth.loading" class="d-flex align-items-center justify-content-center vh-100">
+      <LinearProgress  />
+    </div>
+    <component
+        :is="Component"
+        v-if="!auth.loading"
+    />
+  </router-view>
 </template>
 
 <style lang="scss">

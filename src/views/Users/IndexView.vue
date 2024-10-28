@@ -1,5 +1,6 @@
 <script setup>
 import { useUser } from '@/stores/users';
+import { useAuth } from '@/stores/auth';
 import { CIcon } from '@coreui/icons-vue';
 import { cilOptions } from '@coreui/icons';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
@@ -7,8 +8,10 @@ import { RouterLink, useRouter } from 'vue-router';
 import { onMounted } from 'vue';
 import EmptyResults from '@/components/EmptyResults.vue';
 import LinearProgress from '@/components/LinearProgress.vue';
+
 const store = useUser();
 const router = useRouter();
+const auth = useAuth();
 
 onMounted(() => {
   store.fetchUsers();
@@ -99,10 +102,10 @@ const navigateToView = (uuid) => {
                 <CIcon :icon="cilOptions" class="text-dark" size="lg"/>
               </CDropdownToggle>
               <CDropdownMenu>
-                <RouterLink class="dropdown-item" :to="{name: 'users.edit', params: {uuid: user.uuid}}">
+                <RouterLink v-if="auth.can('users.edit')" class="dropdown-item" :to="{name: 'users.edit', params: {uuid: user.uuid}}">
                   Edit
                 </RouterLink>
-                <RouterLink class="dropdown-item" :to="{name: 'users.detail', params: {uuid: user.uuid}}">
+                <RouterLink v-if="auth.can('users.view')" class="dropdown-item" :to="{name: 'users.detail', params: {uuid: user.uuid}}">
                   View
                 </RouterLink>
               </CDropdownMenu>

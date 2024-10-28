@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import { useStorage } from "@vueuse/core";
 import { useRouter } from "vue-router";
@@ -7,6 +7,9 @@ export const useAuth = defineStore("auth", () => {
   const router = useRouter();
   const accessToken = useStorage("access_token", "");
   const check = computed(() => !!accessToken.value);
+  const user = ref(null);
+  const loading = ref(false);
+  const permissions = ref(null);
 
   function setAccessToken(value) {
     accessToken.value = value;
@@ -15,10 +18,10 @@ export const useAuth = defineStore("auth", () => {
     ] = `Bearer ${accessToken.value}`;
   }
 
-  function login(accessToken) {
+  async function login(accessToken) {
     setAccessToken(accessToken);
-
-    router.push({ name: "Users" });
+    await getAuthenticatedUser();
+    await router.push({ name: "Users" });
   }
 
   function destroyTokenAndRedirectTo(routeName = 'login') {
@@ -27,10 +30,24 @@ export const useAuth = defineStore("auth", () => {
   }
 
   async function logout() {
-    return window.axios.post("auth/destroy").finally(() => {
+    return window.axios.post("auth/destroy").then(() => {
       destroyTokenAndRedirectTo("login");
     });
   }
 
-  return { login, logout, check, destroyTokenAndRedirectTo };
+  async function getAuthenticatedUser() {
+    loading.value = true;
+    await window.axios.get('user').then(async (response) => {
+        user.value = response.data.data;
+        permissions.value = response.data.data.permissions
+    }).finally(() => {
+      loading.value = false;
+    })
+  }
+
+  function can(permission) {
+    return permissions.value?.includes(permission);
+  }
+
+  return { login, logout, check, user, destroyTokenAndRedirectTo, getAuthenticatedUser, loading, permissions, can };
 });

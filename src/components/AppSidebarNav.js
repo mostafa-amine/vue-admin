@@ -1,6 +1,8 @@
 import { defineComponent, h, onMounted, ref, resolveComponent } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
+import { useAuth } from '../stores/auth'
+
 import { CBadge, CSidebarNav, CNavItem, CNavGroup, CNavTitle } from '@coreui/vue'
 import nav from '@/_nav.js'
 
@@ -47,6 +49,7 @@ const AppSidebarNav = defineComponent({
     CNavTitle,
   },
   setup() {
+    const auth = useAuth();
     const route = useRoute()
     const firstRender = ref(true)
 
@@ -130,6 +133,29 @@ const AppSidebarNav = defineComponent({
             },
           )
     }
+    const filteredNavItems = (items) => {
+      return items
+      .map((item) => {
+        // If the item has a permission property, check it
+        if (item.permission && !auth.can(item.permission)) {
+          return null;
+        }
+
+        // If the item has nested items, recursively filter them
+        if (item.items) {
+          const filteredItems = filteredNavItems(item.items);
+          if (filteredItems.length > 0) {
+            return { ...item, items: filteredItems };
+          } else {
+            return null;
+          }
+        }
+
+        // Return item if it doesn't have a permission property or it passed the check
+        return item;
+      })
+      .filter(Boolean); // Filter out any null items
+    }
 
     return () =>
       h(
@@ -138,7 +164,7 @@ const AppSidebarNav = defineComponent({
           as: simplebar,
         },
         {
-          default: () => nav.map((item) => renderItem(item)),
+          default: () => filteredNavItems(nav).map((item) => renderItem(item)),
         },
       )
   },

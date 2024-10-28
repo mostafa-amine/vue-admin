@@ -15,6 +15,7 @@ export default [
         component: 'CNavItem',
         name: 'Users',
         to: '/users',
+        permission: 'users.view'
       },
     ],
   },
