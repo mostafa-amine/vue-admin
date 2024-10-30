@@ -49,5 +49,15 @@ export const useAuth = defineStore("auth", () => {
     return permissions.value?.includes(permission);
   }
 
-  return { login, logout, check, user, destroyTokenAndRedirectTo, getAuthenticatedUser, loading, permissions, can };
+  return {
+    login,
+    logout,
+    destroyTokenAndRedirectTo,
+    getAuthenticatedUser,
+    check,
+    user,
+    loading,
+    permissions,
+    can
+  }
 });

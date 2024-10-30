@@ -1,7 +1,7 @@
 import { reactive, ref } from "vue";
 import { defineStore } from "pinia";
 import { useRoute } from 'vue-router'
-import router from "../router";
+import router from "@/router";
 import { useToast } from "vue-toastification";
 
 export const useUser = defineStore("users", () => {
