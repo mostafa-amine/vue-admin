@@ -5,11 +5,11 @@ const props = defineProps(["errors", "field"]);
 
 <template>
   <div
-    v-if="props?.errors?.value?.[props.field]?.length"
+    v-if="props?.errors?.[props.field]?.length"
     class="text-danger"
     style="font-size: 13px;"
   >
-    <p v-for="message in props.errors.value[props.field]" :key="message">
+    <p v-for="message in props.errors[props.field]" :key="message">
       {{ message }}
     </p>
   </div>

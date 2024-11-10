@@ -41,13 +41,13 @@ const deleteUser = () => {
         <CButton class="text-light ms-2" size="sm" color="primary">Edit User</CButton>
       </RouterLink>
     </div>
-  </div>
+</div>
 
   <LinearProgress v-if="store.loading" />
 
   <div v-else class="row">
     <div class="col-md-3">
-      <CFormLabel for="name" class="fw-bold">Image</CFormLabel> <br>
+      <CFormLabel for="image" class="fw-bold">Image</CFormLabel> <br>
       <CImage fluid :src="store.form.imageUrl" width="150" height="150"/>
     </div>
 
@@ -59,9 +59,18 @@ const deleteUser = () => {
     </div>
 
     <div class="col-md-3">
-      <CFormLabel for="name" class="fw-bold">Email</CFormLabel>
+      <CFormLabel for="email" class="fw-bold">Email</CFormLabel>
       <p>
-        {{ store.form.name }}
+        {{ store.form.email }}
+      </p>
+    </div>
+
+    <div class="col-md-3">
+      <CFormLabel for="name" class="fw-bold">Role</CFormLabel>
+      <p>
+        <span class="badge bg-primary">
+          {{ store.form.role.name }}
+        </span>
       </p>
     </div>
   </div>

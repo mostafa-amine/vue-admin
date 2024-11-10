@@ -4,11 +4,13 @@ import { useRoute } from 'vue-router'
 import router from "@/router";
 import { useToast } from "vue-toastification";
 
-export const useUser = defineStore("users", () => {
+export const useRole = defineStore("roles", () => {
   const toast = useToast();
   const loading = ref(false);
   const errors = ref({});
   const data = ref();
+  const permissions = ref([]);
+  const allRoles = ref([]);
 
   const queries = ref({
     sort: "",
@@ -20,27 +22,48 @@ export const useUser = defineStore("users", () => {
 
   const form = reactive({
     name: "",
-    email: "",
-    image: "",
-    imageUrl: "",
-    role: null
+    permissions: []
   });
 
   function resetForm() {
     form.name = "";
-    form.email = "";
-    form.role = null
+    form.permissions = [];
 
     errors.value = {};
   }
 
-  function fetchUsers(resetPageFlag = false) {
+  function fetchAllRoles() {
+    loading.value = true;
+
+    window.axios.get('roles/all')
+    .then((response) => {
+      allRoles.value = response.data.data
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+  }
+
+  function fetchPermissions() {
+    loading.value = true;
+
+    window.axios.get('permissions')
+    .then((response) => {
+      permissions.value = response.data.data
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+  }
+
+  function fetchRoles(resetPageFlag = false) {
     if (resetPageFlag) {
       resetPage();
     }
 
     loading.value = true;
-    window.axios.get(`/users?${new URLSearchParams(queries.value).toString()}`)
+
+    window.axios.get(`/roles?${new URLSearchParams(queries.value).toString()}`)
     .then((response) => {
       data.value = response.data
     })
@@ -54,30 +77,20 @@ export const useUser = defineStore("users", () => {
     queries.value.page = 1;
   }
 
-  function storeUser() {
+  function storeRole() {
     if (loading.value) return;
 
     loading.value = true;
     errors.value = {};
 
-    let serializedForm = new FormData()
-    for (let item in form) {
-        if (form.hasOwnProperty(item)) {
-          if (item === 'role') {
-            serializedForm.append('role_id', form[item]?.id)
-          } else {
-            serializedForm.append(item, form[item])
-          }
-        }
-    }
-
     window.axios
-      .post("users", serializedForm)
+      .post("roles", form)
       .then(() => {
-        router.push({ name: "Users" });
-        toast.success('User Created');
+        router.push({ name: "roles.index" });
+        toast.success('Role Created');
       })
       .catch((error) => {
+        console.log(error)
         if (error.response.status === 422) {
           errors.value = error.response.data.errors;
         }
@@ -85,26 +98,17 @@ export const useUser = defineStore("users", () => {
       .finally(() => (loading.value = false));
   }
 
-  function updateUser(user) {
+  function updateRole(role) {
     if (loading.value) return;
 
     loading.value = true;
     errors.value = {};
 
-    let serializedForm = new FormData()
-    for (let item in form) {
-      if (item === 'role') {
-        serializedForm.append('role_id', form[item]?.id)
-      } else {
-        serializedForm.append(item, form[item])
-      }
-    }
-
     window.axios
-      .post(`users/${user.uuid}`, serializedForm)
+      .put(`roles/${role.uuid}`, form)
       .then(() => {
-        router.push({ name: "Users" });
-        toast.success("User Updated");
+        router.push({ name: "roles.index" });
+        toast.success("Role Updated");
       })
       .catch((error) => {
         if (error.response.status === 422) {
@@ -118,35 +122,42 @@ export const useUser = defineStore("users", () => {
 
   function changePage(page) {
     queries.value.page = page
-    fetchUsers()
+    fetchRoles()
   }
 
-  function getUser(user) {
+  function getRole(role) {
     loading.value = true;
-    window.axios.get(`users/${user.uuid}`).then((response) => {
+    window.axios.get(`roles/${role.uuid}`).then((response) => {
       form.name = response.data.data.name;
-      form.email = response.data.data.email;
-      form.imageUrl = response.data.data.image;
-      form.role = response.data.data.role;
+      form.permissions = response.data.data.permissions;
     }).finally(() => (loading.value = false));
   }
 
-  function deleteUser(user) {
+  function deleteRole(role) {
     loading.value = true;
-    window.axios.delete(`users/${user.uuid}`).then(fetchUsers).finally(() => {
-      toast.success("User Deleted");
-      router.push({ name: "Users" });
+    window.axios.delete(`roles/${role.uuid}`).then(fetchRoles).finally(() => {
+      toast.success("Role Deleted");
+      router.push({ name: "users.index" });
     });
   }
 
+  function getPermissions(role) {
+    return role.permissions.map(item => `<span class="badge bg-primary">${item.name}</span>`).join(' ');
+  }
+
   return {
-    fetchUsers,
+    fetchRoles,
     changePage,
-    getUser,
-    updateUser,
+    getRole,
+    updateRole,
     resetForm,
-    deleteUser,
-    storeUser,
+    deleteRole,
+    storeRole,
+    getPermissions,
+    fetchPermissions,
+    fetchAllRoles,
+    allRoles,
+    permissions,
     form,
     errors,
     queries,

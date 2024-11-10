@@ -11,6 +11,7 @@ import { iconsSet as icons } from '@/assets/icons'
 import DocsExample from '@/components/DocsExample'
 import ValidationError from "@/components/ValidationError.vue";
 import "vue-toastification/dist/index.css";
+import "vue-multiselect/dist/vue-multiselect.min.css";
 import "@/bootstrap.js";
 
 const app = createApp(App)

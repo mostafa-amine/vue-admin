@@ -2,22 +2,23 @@
 import { watchEffect, onBeforeUnmount } from "vue";
 import { useUser } from "@/stores/users";
 import { useRoute } from "vue-router";
-import LinearProgress from "@/components/LinearProgress.vue";
+import { useRole } from "@/stores/roles";
+import Multiselect from 'vue-multiselect';
 
 const store = useUser();
 const route = useRoute();
+const roleStore = useRole();
 
 onBeforeUnmount(store.resetForm);
 
 watchEffect(async () => {
   store.getUser({ uuid: route.params.uuid });
+  roleStore.fetchAllRoles();
 });
 </script>
 
 <template>
-  <LinearProgress v-if="store.loading" />
-
-  <CForm v-else @submit.prevent="store.updateUser({ uuid: route.params.uuid })" novalidate>
+  <CForm @submit.prevent="store.updateUser({ uuid: route.params.uuid })" novalidate>
     <div class="row">
       <div class="col-md-6 mb-2">
         <CFormLabel for="image">Image</CFormLabel>
@@ -25,7 +26,7 @@ watchEffect(async () => {
           <CImage fluid :src="store.form.imageUrl" width="150" height="150"/>
         </div>
         <CFormInput
-          :invalid="store.errors.value?.image"
+          :invalid="store.errors.hasOwnProperty('image')"
           @change="store.form.image = $event.target.files[0]"
           type="file"
           id="image"
@@ -35,14 +36,25 @@ watchEffect(async () => {
 
       <div class="col-md-6">
         <CFormLabel for="name">Name</CFormLabel>
-        <CFormInput v-model="store.form.name" type="text" id="name" placeholder="Name"/>
+        <CFormInput :invalid="store.errors.hasOwnProperty('name')" v-model="store.form.name" type="text" id="name" placeholder="Name"/>
         <ValidationError :errors="store.errors" field="name" />
       </div>
 
       <div class="col-md-6">
         <CFormLabel for="email">Email</CFormLabel>
-        <CFormInput v-model="store.form.email" type="email" id="email" placeholder="name@example.com"/>
+        <CFormInput :invalid="store.errors.hasOwnProperty('email')" v-model="store.form.email" type="email" id="email" placeholder="name@example.com"/>
         <ValidationError :errors="store.errors" field="email" />
+      </div>
+
+      <div class="col-md-6">
+        <CFormLabel for="role">Role</CFormLabel>
+        <Multiselect
+          v-model="store.form.role"
+          track-by="name"
+          label="name"
+          :options="roleStore.allRoles"
+        />
+        <ValidationError :errors="store.errors" field="role_id" />
       </div>
     </div>
 

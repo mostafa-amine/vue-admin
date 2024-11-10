@@ -17,6 +17,12 @@ export default [
         to: '/users',
         permission: 'users.view'
       },
+      {
+        component: 'CNavItem',
+        name: 'Roles',
+        to: '/roles',
+        permission: 'roles.view'
+      },
     ],
   },
 ]
