@@ -4,7 +4,7 @@ import { useAuth } from "@/stores/auth";
 
 export const useLogin = defineStore("login", () => {
   const auth = useAuth();
-  const errors = reactive({});
+  const errors = ref({});
   const loading = ref(false);
   const form = reactive({
     email: "",
@@ -28,9 +28,9 @@ export const useLogin = defineStore("login", () => {
 
     return window.axios
       .post("auth/login", form)
-      .then((response) => {
+      .then(async (response) => {
         const data = response.data;
-        auth.login(data.access_token);
+        await auth.login(data.access_token);
       })
       .catch((error) => {
         if (error.response.status === 422) {

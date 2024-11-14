@@ -9,6 +9,7 @@ const props = defineProps(["errors", "field"]);
     class="text-danger"
     style="font-size: 13px;"
   >
+
     <p v-for="message in props.errors[props.field]" :key="message">
       {{ message }}
     </p>

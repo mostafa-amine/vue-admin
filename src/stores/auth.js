@@ -20,8 +20,7 @@ export const useAuth = defineStore("auth", () => {
 
   async function login(accessToken) {
     setAccessToken(accessToken);
-    await getAuthenticatedUser();
-    await router.push({ name: "Users" });
+    await getAuthenticatedUser(true);
   }
 
   function destroyTokenAndRedirectTo(routeName = 'login') {
@@ -35,13 +34,18 @@ export const useAuth = defineStore("auth", () => {
     });
   }
 
-  async function getAuthenticatedUser() {
+  async function getAuthenticatedUser(redirectToUsersPage = false) {
     loading.value = true;
     await window.axios.get('user').then(async (response) => {
         user.value = response.data.data;
         permissions.value = response.data.data.permissions
-    }).finally(() => {
-      loading.value = false;
+    }).finally(async () => {
+      if (redirectToUsersPage) {
+        await router.push({ name: "Users" });
+        loading.value = false;
+      } else {
+        loading.value = false;
+      }
     })
   }
 
